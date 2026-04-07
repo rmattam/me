@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gender Reveal!</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fce4ec, #e3f2fd, #fce4ec);
+      font-family: 'Georgia', serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #555;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    p.hint {
+      color: #888;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .card-container {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .reveal-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #42a5f5, #1565c0);
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .reveal-content .emoji {
+      font-size: 5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .reveal-content .gender-text {
+      font-size: 3.5rem;
+      font-weight: bold;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      letter-spacing: 2px;
+    }
+
+    .reveal-content .subtitle {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+      opacity: 0.9;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      touch-action: none;
+    }
+
+    .confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #revealMsg {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      color: #1565c0;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s;
+      text-align: center;
+    }
+
+    #revealMsg.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>&#127880; Gender Reveal &#127880;</h1>
+  <p class="hint">Scratch the card to find out!</p>
+
+  <div class="card-container">
+    <div class="reveal-content">
+      <div class="emoji">&#128118;</div>
+      <div class="gender-text">It's a Boy!</div>
+      <div class="subtitle">&#128153; Welcome, little one &#128153;</div>
+    </div>
+    <canvas id="scratchCanvas" width="320" height="320"></canvas>
+  </div>
+
+  <div id="revealMsg">&#127881; Congratulations! &#127881;</div>
+
+  <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('scratchCanvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      let isDrawing = false;
+      let revealed = false;
+
+      // Draw scratch-off cover
+      function drawCover() {
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, '#b0bec5');
+        grad.addColorStop(0.5, '#cfd8dc');
+        grad.addColorStop(1, '#b0bec5');
+        ctx.fillStyle = grad;
+
+        // Rounded rect
+        const r = 24;
+        ctx.beginPath();
+        ctx.moveTo(r, 0);
+        ctx.lineTo(width - r, 0);
+        ctx.quadraticCurveTo(width, 0, width, r);
+        ctx.lineTo(width, height - r);
+        ctx.quadraticCurveTo(width, height, width - r, height);
+        ctx.lineTo(r, height);
+        ctx.quadraticCurveTo(0, height, 0, height - r);
+        ctx.lineTo(0, r);
+        ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Question marks pattern
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.font = 'bold 36px Georgia';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (let y = 30; y < height; y += 65) {
+          for (let x = 30; x < width; x += 65) {
+            ctx.fillText('?', x, y);
+          }
+        }
+
+        // Center text
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = 'bold 22px Georgia';
+        ctx.fillText('Scratch Here!', width / 2, height / 2);
+      }
+
+      drawCover();
+
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = 50;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = width / rect.width;
+        const scaleY = height / rect.height;
+        if (e.touches) {
+          return {
+            x: (e.touches[0].clientX - rect.left) * scaleX,
+            y: (e.touches[0].clientY - rect.top) * scaleY
+          };
+        }
+        return {
+          x: (e.clientX - rect.left) * scaleX,
+          y: (e.clientY - rect.top) * scaleY
+        };
+      }
+
+      function startDraw(e) {
+        e.preventDefault();
+        isDrawing = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        checkReveal();
+      }
+
+      function stopDraw(e) {
+        if (e) e.preventDefault();
+        isDrawing = false;
+      }
+
+      // Mouse events
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseleave', stopDraw);
+
+      // Touch events
+      canvas.addEventListener('touchstart', startDraw, { passive: false });
+      canvas.addEventListener('touchmove', draw, { passive: false });
+      canvas.addEventListener('touchend', stopDraw, { passive: false });
+
+      function checkReveal() {
+        if (revealed) return;
+        const imageData = ctx.getImageData(0, 0, width, height);
+        let transparent = 0;
+        const total = imageData.data.length / 4;
+        for (let i = 3; i < imageData.data.length; i += 4) {
+          if (imageData.data[i] === 0) transparent++;
+        }
+        if (transparent / total > 0.45) {
+          revealed = true;
+          // Clear remaining cover
+          ctx.clearRect(0, 0, width, height);
+          document.getElementById('revealMsg').classList.add('visible');
+          launchConfetti();
+        }
+      }
+
+      // Confetti
+      function launchConfetti() {
+        const cc = document.getElementById('confettiCanvas');
+        cc.width = window.innerWidth;
+        cc.height = window.innerHeight;
+        const cctx = cc.getContext('2d');
+        const pieces = [];
+        const colors = ['#42a5f5', '#1e88e5', '#90caf9', '#bbdefb', '#ffffff', '#64b5f6', '#1565c0'];
+
+        for (let i = 0; i < 200; i++) {
+          pieces.push({
+            x: Math.random() * cc.width,
+            y: Math.random() * cc.height - cc.height,
+            w: Math.random() * 10 + 5,
+            h: Math.random() * 6 + 3,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            vy: Math.random() * 3 + 2,
+            vx: (Math.random() - 0.5) * 2,
+            rot: Math.random() * Math.PI * 2,
+            rv: (Math.random() - 0.5) * 0.1
+          });
+        }
+
+        let frame = 0;
+        function animate() {
+          if (frame > 300) { cctx.clearRect(0, 0, cc.width, cc.height); return; }
+          frame++;
+          cctx.clearRect(0, 0, cc.width, cc.height);
+          for (const p of pieces) {
+            p.y += p.vy;
+            p.x += p.vx;
+            p.rot += p.rv;
+            cctx.save();
+            cctx.translate(p.x, p.y);
+            cctx.rotate(p.rot);
+            cctx.fillStyle = p.color;
+            cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            cctx.restore();
+          }
+          requestAnimationFrame(animate);
+        }
+        animate();
+      }
+    })();
+  </script>
+</body>
+</html>
