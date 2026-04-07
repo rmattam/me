@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Baby Reveal!</title>
+  <title>Baby Gender Reveal!</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
@@ -96,6 +96,42 @@
       color: #fff;
       text-align: center;
       padding: 1rem;
+      background: linear-gradient(135deg, #bdbdbd, #9e9e9e);
+      transition: background 0.5s;
+    }
+
+    .reveal-content .scratch-more {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: center;
+      justify-content: center;
+      gap: 0.3rem;
+      padding: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: rgba(255,255,255,0.7);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      transition: opacity 0.4s;
+      overflow: hidden;
+    }
+
+    .reveal-content .scratch-more span {
+      white-space: nowrap;
+    }
+
+    .reveal-content.revealed .scratch-more {
+      opacity: 0;
+    }
+
+    .reveal-content .result-inner {
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .reveal-content.revealed .result-inner {
+      opacity: 1;
     }
 
     .reveal-content.correct {
@@ -127,6 +163,8 @@
     .scratch-canvas {
       position: absolute;
       inset: 0;
+      width: 100%;
+      height: 100%;
       border-radius: 24px;
       touch-action: none;
     }
@@ -158,6 +196,21 @@
 
     #revealMsg.wrong {
       color: #c62828;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+      p.hint { font-size: 0.85rem; margin-bottom: 0.75rem; }
+      .cards-wrapper { flex-direction: column; gap: 0.75rem; }
+      .card-label { width: 56px; height: 56px; margin-bottom: 0.25rem; }
+      .card-label-text { font-size: 0.85rem; margin-bottom: 0.4rem; }
+      .card-container { width: 160px; height: 160px; border-radius: 16px; }
+      .scratch-canvas { border-radius: 16px; }
+      .reveal-content .result-emoji { font-size: 2.2rem; margin-bottom: 0.25rem; }
+      .reveal-content .result-text { font-size: 1.2rem; }
+      .reveal-content .result-sub { font-size: 0.8rem; }
+      .reveal-content .scratch-more { font-size: 0.5rem; gap: 0.2rem; padding: 0.3rem; }
+      #revealMsg { font-size: 1rem; margin-top: 0.75rem; }
     }
   </style>
 </head>
@@ -197,10 +250,13 @@
       </div>
       <div class="card-label-text">Girl</div>
       <div class="card-container" id="card-girl">
-        <div class="reveal-content wrong">
-          <div class="result-emoji">&#10060;</div>
-          <div class="result-text">Not quite!</div>
-          <div class="result-sub">It's a Boy &#128153;</div>
+        <div class="reveal-content" data-result="wrong">
+          <div class="scratch-more"><span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span></div>
+          <div class="result-inner">
+            <div class="result-emoji">&#10060;</div>
+            <div class="result-text">Not quite!</div>
+            <div class="result-sub">It's a Boy &#128153;</div>
+          </div>
         </div>
         <canvas class="scratch-canvas" data-choice="girl" width="280" height="280"></canvas>
       </div>
@@ -246,10 +302,13 @@
       </div>
       <div class="card-label-text">Boy</div>
       <div class="card-container" id="card-boy">
-        <div class="reveal-content correct">
-          <div class="result-emoji">&#127881;</div>
-          <div class="result-text">Correct!</div>
-          <div class="result-sub">It's a Boy &#128153;</div>
+        <div class="reveal-content" data-result="correct">
+          <div class="scratch-more"><span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span> <span>Scratch Some More!!</span></div>
+          <div class="result-inner">
+            <div class="result-emoji">&#127881;</div>
+            <div class="result-text">Correct!</div>
+            <div class="result-sub">It's a Boy &#128153;</div>
+          </div>
         </div>
         <canvas class="scratch-canvas" data-choice="boy" width="280" height="280"></canvas>
       </div>
@@ -313,14 +372,15 @@
           }
 
           ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          ctx.font = 'bold 20px Georgia';
+          ctx.font = (window.innerWidth <= 640) ? 'bold 34px Georgia' : 'bold 20px Georgia';
           ctx.fillText('Scratch Here!', width / 2, height / 2);
         }
 
         drawCover();
 
         ctx.globalCompositeOperation = 'destination-out';
-        ctx.lineWidth = 45;
+        const isMobile = window.innerWidth <= 640;
+        ctx.lineWidth = isMobile ? 75 : 45;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
@@ -379,7 +439,8 @@
           for (let i = 3; i < imageData.data.length; i += 4) {
             if (imageData.data[i] === 0) transparent++;
           }
-          if (transparent / total > 0.4) {
+          const revealThreshold = (window.innerWidth <= 640) ? 0.5 : 0.5;
+          if (transparent / total > revealThreshold) {
             revealed = true;
             gameOver = true;
             ctx.clearRect(0, 0, width, height);
@@ -387,7 +448,12 @@
             const isCorrect = choice === CORRECT;
             const msg = document.getElementById('revealMsg');
 
-            // Also reveal the other card
+            // Reveal colors and text on both cards
+            document.querySelectorAll('.reveal-content').forEach(function (el) {
+              el.classList.add(el.getAttribute('data-result'), 'revealed');
+            });
+
+            // Also clear the other card's scratch layer
             document.querySelectorAll('.scratch-canvas').forEach(function (c) {
               c.getContext('2d').clearRect(0, 0, c.width, c.height);
             });
